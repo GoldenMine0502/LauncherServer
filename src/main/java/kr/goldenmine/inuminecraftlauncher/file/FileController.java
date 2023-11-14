@@ -17,10 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/file")
@@ -42,26 +39,21 @@ public class FileController {
         return "mods/" + mod;
     }
 
-    private static String getVersionsFile() {
-        return "versions.txt";
-    }
-
     private static List<String> versions = new ArrayList<>();
 
     static {
-        // load all available versions
-        File file = new File(getVersionsFile());
-        try(BufferedReader r = new BufferedReader(new FileReader(file))) {
-            String s;
-            while((s = r.readLine()) != null) {
-                versions.add(s);
-                logger.info("version: " + s);
+        File directory = new File("files/versions");
+        if(directory.exists()) {
+            File[] files = directory.listFiles();
+            if(files != null) {
+                for(int i = 0; i < files.length; i++) {
+                    String name = files[i].getName();
+                    name = name.substring(0, name.lastIndexOf('.')); // 확장자 제거
+                    versions.add(name);
+                }
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        logger.info("versions: " + versions);
     }
 
     @PostMapping("/versions")
